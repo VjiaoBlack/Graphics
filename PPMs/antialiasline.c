@@ -19,6 +19,7 @@ int main(int argc, char* argv[]) {
         placeholder, acc, delta, func,
         up, right, r = 255, g = 255, b = 255,
         x1 = 0, y1 = 0, x2 = 0, y2 = 0;
+    float antialias;
     char* filename = malloc(sizeof(char) * 256);
     char* line = malloc(sizeof(char) * 1001); //throwaway. /donest work, fml
     
@@ -87,12 +88,40 @@ int main(int argc, char* argv[]) {
                 to calculate how dark the two pixels in each pixel-pair should be. 
                 Again, like the bresenham, this is much more of an approximation than anything else.
                 Note that for perfectly diagonal lines, the algorithm will produce about the same result.
-            */
+            */                
 
-            while (x <= x2) { 
-                pixels[y][x] = (pixel_t) {r, g, b}; // for antialiasing this needs to change @@@@@@@@@@@@@@@@@@@@@
-
+            while (x <= x2) { // This is the drawing function 
+                pixels[y][x] = (pixel_t) {r, g, b};
+        
                 // the partner of the current pixel is at (x,y), (x,y+1) if DOWN, (x,y-1) if UP. (unless acc = 0)
+                int partnerx = x, partnery = y;
+
+
+                pixel_t partnerpixel = (pixel_t) {pixels[partnery][x].r, pixels[partnery][x].g, pixels[partnery][x].b};
+                if (acc) {
+                    if (up && y > 0)
+                        partnery = y - 1;
+                    else if (y < 499)
+                        partnery = y + 1;
+
+                    partnerpixel.r = r;
+                    partnerpixel.g = g;
+                    partnerpixel.b = b;
+
+                    antialias = (float) (delta - acc) / (float) (delta);
+                    antialias = pow(antialias, .75);
+                    pixels[y][x].r = (int) ( (float) pixels[y][x].r * antialias);
+                    pixels[y][x].g = (int) ( (float) pixels[y][x].g * antialias);
+                    pixels[y][x].b = (int) ( (float) pixels[y][x].b * antialias);
+
+                    antialias = (float) (acc) / (float) (delta);
+                    antialias = pow(antialias, .75);
+                    partnerpixel.r = (int) ( (float) partnerpixel.r * antialias);
+                    partnerpixel.g = (int) ( (float) partnerpixel.g * antialias);
+                    partnerpixel.b = (int) ( (float) partnerpixel.b * antialias);
+                }
+
+                pixels[partnery][partnerx] = partnerpixel;
 
                 acc += abs(y2 - y1);
                 if (acc >= delta) {
@@ -104,6 +133,7 @@ int main(int argc, char* argv[]) {
                 } 
                 x++;
             }   
+
         } else if (abs(x1 - x2) < abs(y1 - y2)) { // going in the y dir 
 
             if (y1 > y2) { // swaps points so that you're going down
@@ -120,9 +150,38 @@ int main(int argc, char* argv[]) {
 
             right = (x2 > x1);
 
-            while (y <= y2) { // this somehow breaks on the last run
+            while (y <= y2) { 
+                pixels[y][x] = (pixel_t) {r, g, b}; 
 
-                pixels[y][x] = (pixel_t) {r, g, b}; // for antialiasing this needs to change @@@@@@@@@@@@@@@@@@@@@
+
+                int partnerx = x, partnery = y;
+
+                pixel_t partnerpixel = (pixel_t) {pixels[y][partnerx].r, pixels[y][partnerx].g, pixels[y][partnerx].b};
+
+                if (acc) {
+                    if (right && x < 499)
+                        partnerx = x + 1;
+                    else if (x > 0)
+                        partnerx = x - 1;
+
+                    partnerpixel.r = r;
+                    partnerpixel.g = g;
+                    partnerpixel.b = b;
+
+                    antialias = (float) (delta - acc) / (float) (delta);
+                    antialias = pow(antialias, .99);
+                    pixels[y][x].r = (int) ( (float) pixels[y][x].r * antialias);
+                    pixels[y][x].g = (int) ( (float) pixels[y][x].g * antialias);
+                    pixels[y][x].b = (int) ( (float) pixels[y][x].b * antialias);
+
+                    antialias = (float) (acc) / (float) (delta);
+                    antialias = pow(antialias, .75);
+                    partnerpixel.r = (int) ( (float) partnerpixel.r * antialias);
+                    partnerpixel.g = (int) ( (float) partnerpixel.g * antialias);
+                    partnerpixel.b = (int) ( (float) partnerpixel.b * antialias);
+                }
+
+                pixels[partnery][partnerx] = partnerpixel;
 
                 acc += abs(x2 - x1);
                 if (acc >= delta) {

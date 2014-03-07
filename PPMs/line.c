@@ -21,8 +21,10 @@ int main(int argc, char* argv[]) {
         x1 = 0, y1 = 0, x2 = 0, y2 = 0;
     char* filename = malloc(sizeof(char) * 256);
     char* line = malloc(sizeof(char) * 1001); //throwaway. /donest work, fml
+
+    char* inputname = argv[1];
     
-    FILE* input = fopen("input.txt", "r");
+    FILE* input = fopen(inputname, "r");
 
     pixel_t pixels[CANVAS_SIZE][CANVAS_SIZE];
 
