@@ -1,0 +1,12 @@
+# this is a test line
+line 0 0 0 100 50 0
+rotate-z 90
+move 200 200 0
+transform
+line 0 0 0 100 50 0
+move 200 200 0
+render-parallel
+screen 0 0 499 499
+pixels 499 499
+file test.ppm
+end
