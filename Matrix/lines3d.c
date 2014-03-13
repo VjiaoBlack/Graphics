@@ -6,6 +6,14 @@
 #include "parse_util.h"
 #include <string.h>
 
+// BUGS:
+// sometimes unset (set to 0 as init, but that's it) pixels will suddenly change to big numbers like 32407.
+// always the same number.
+// they come and go with a different input setup
+// i have no idea.
+// also, my antialiasing algorithm seems to be slightly off, and can sometimes generate uneveness of lumosity
+// for some slanted lines (seems to be those nearest 45 degrees with the most probs, as expected.)
+
 #define pixels(y,x) pixels[y*dxmax + x]
 int* pixels;
 int dxmax;
@@ -48,15 +56,34 @@ void drawLine(int x1, int y1, int x2, int y2) {
                 else if (y < dymax)
                     partnery = y + 1;
 
+
+
                 hold = 255 - pixels(y,x);
+
+                if (pixels(y,x) > 255)
+                    pixels(y,x) = 255;
                 antialias = (float) (delta - acc) / (float) (delta); // which pixel is closer linearlly
-                antialias = pow(antialias, .75);                    // scales brightness
+                antialias = pow(antialias, .70);                    // scales brightness
                 pixels(y,x) = (int) ( antialias * (float) hold) + pixels(y,x);
 
+                if (x == 304 && y == 264) {
+                    printf("test: %d at %d, %d\n", pixels(y,x), x, y);
+                }
+
+                if (pixels(partnery,partnerx) > 255)
+                    pixels(partnery,partnerx) = 255;
                 hold = 255 - pixels(partnery, partnerx);
+                if (pixels(partnery,partnerx) > 255) {
+                    printf("failure at %d, %d with %d\n", partnerx, partnery, pixels(partnery,partnerx));
+                }
                 antialias = (float) (acc) / (float) (delta);
-                antialias = pow(antialias, .75);
+                antialias = pow(antialias, .70);
                 partnerpixel = (int) ( antialias * (float) hold) + pixels(partnery,partnerx);
+
+                if (partnerx == 304 && partnery == 264) {
+                    printf("ptest: %d at %d, %d\n", pixels(partnery,partnerx), partnerx, partnery);
+                    printf("  data: hold,%d; anti,%f;\n", hold, antialias);
+                }
             } else {
                 pixels(y,x) = 255;
             }
@@ -94,19 +121,27 @@ void drawLine(int x1, int y1, int x2, int y2) {
                 else if (x > 0)
                     partnerx = x - 1;
 
+                if (pixels(y,x) > 255)
+                pixels(y,x) = 255;
                 hold = 255 - pixels(y,x);
+
                 antialias = (float) (delta - acc) / (float) (delta);
-                antialias = pow(antialias, .75);
+                antialias = pow(antialias, .70);
                 pixels(y,x) = (int) ( antialias * (float) hold) + pixels(y,x);
 
+                if (y == 264 && (x == 304))
+                    printf("test: %d at %d, %d\n", pixels(y,x), x, y);
+               
+                if (pixels(partnery,partnerx) > 255)
+                pixels(partnery,partnerx) = 255;
                 hold = 255 - pixels(partnery,partnerx);
                 antialias = (float) (acc) / (float) (delta);
-                antialias = pow(antialias, .75);
+                antialias = pow(antialias, .70);
                 partnerpixel = (int) ( antialias * (float) hold) + pixels(partnery, partnerx);
-
             } else {
                 pixels(y,x) = 255; // if the pixel is perfectly aligned with the liene to draw
             }
+
             pixels(partnery,partnerx) = partnerpixel;
 
             acc += abs(x2 - x1);
@@ -158,7 +193,7 @@ int main(int argc, char* argv[]) {
 
         printf("%s", inputargv[0]);
 
-        if (strcmp(inputargv[0],"#") == 0) {
+        if (strcmp(inputargv[0],"#") == 0 || *inputargv[0] == '#') {
             printf(" comment:");
             for (i = 1; i < inputargc; i++) {
                 printf(" %s", inputargv[i]);
@@ -246,7 +281,7 @@ int main(int argc, char* argv[]) {
 
     x = 0;
     y = 0;
-    pixels = malloc(sizeof(int) * dxmax * dymax);
+    pixels = calloc(dxmax * dymax, sizeof(int));
     while (y < dymax) {
         while (x < dxmax) {
             pixels[y*dxmax + x] = 0;
