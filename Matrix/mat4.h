@@ -14,6 +14,7 @@ Mat4 *mat4_create_identity();
 Mat4 *mat4_add_column(Mat4 *old, double *new_cells);
 Mat4 *mat4_set(Mat4 *matrix, int row, int col, double value);
 double mat4_get(Mat4 *matrix, int row, int col);
+Mat4* mat4_copy(Mat4* matrix);
 
 double dotprod(double* u, double* v);
 Mat4* mat4_mult(Mat4* tmatrix, Mat4* imatrix);

@@ -147,7 +147,8 @@ double mat4_get(Mat4 *matrix, int row, int col) {
 }
 
 double dotprod(double* u, double* v) {
-	int i, result = 0;
+	int i;
+    double result = 0;
 	for (i = 0; i < 4; i++) {
 		result += u[i] * v[i];
 	}

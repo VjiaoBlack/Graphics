@@ -7,6 +7,10 @@
 
 void combine(Mat4* new) {
     tmatrix = mat4_mult(new, tmatrix);
+    // print(new);
+    // printf("\n");
+    // print(tmatrix);
+    //tmatrix = new;
 }
 
 void init() { // initializes tmatrix to default value and ematrix.
@@ -52,7 +56,6 @@ void move(double x, double y, double z) {
     mat4_set(new, 2, 3, z);
 
     combine(new);
-
     return;
 }
 
@@ -73,23 +76,24 @@ void rotate(char axis, int degrees) {
     double c = cos(radians);
     double s = sin(radians);
     Mat4* new = identity();
+    printf("rotating...\n");
 
     switch(axis) {
         case 'x':
             mat4_set(new, 1, 1, c);
-            mat4_set(new, 1, 2, 0 - s);
+            mat4_set(new, 1, 2, 0.0 - s);
             mat4_set(new, 2, 1, s);
             mat4_set(new, 2, 2, c);
             break;
         case 'y':
             mat4_set(new, 0, 0, c);
-            mat4_set(new, 2, 0, 0 - s);
-            mat4_set(new, 2, 0, s);
+            mat4_set(new, 2, 0, 0.0 - s);
+            mat4_set(new, 0, 2, s);
             mat4_set(new, 2, 2, c);
             break;
         case 'z':
             mat4_set(new, 0, 0, c);
-            mat4_set(new, 0, 1, 0 - s);
+            mat4_set(new, 0, 1, 0.0 - s);
             mat4_set(new, 1, 0, s);
             mat4_set(new, 1, 1, c);
             break;
@@ -102,5 +106,9 @@ void rotate(char axis, int degrees) {
 void transform() {
     ematrix = mat4_mult(tmatrix, ematrix);
     return;
+}
+
+void sphere(int r, int cx, int cy, int cz) {
+    
 }
 
