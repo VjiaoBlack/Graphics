@@ -4,25 +4,6 @@
 #include "mat4.h"
 
 
-// int main(int argc, char* argv[]) {
-// 	Mat4* tmatrix = mat4_create(0);
-// 	Mat4* imatrix = mat4_create(0);
-// 	double new_cells[4] = {1.0, 2.0, 4.0, 3.0};
-// 	mat4_add_column(mat4_add_column(mat4_add_column(mat4_add_column(tmatrix, new_cells), new_cells), new_cells), new_cells);
-// 	mat4_add_column(mat4_add_column(mat4_add_column(mat4_add_column(mat4_add_column(mat4_add_column(imatrix, new_cells), new_cells), new_cells), new_cells), new_cells), new_cells);
-
-// 	Mat4* ans = mat4_mult(tmatrix, imatrix);
-
-// 	print(tmatrix);
-// 	printf("\ntimes...\n");
-// 	print(imatrix);
-// 	printf("\nequals...\n");
-// 	print(ans);
-
-// 	return 1;
-// }
-
-
 /* 	==================== mat4_create() ========================================================
 	Create a matrix (with 4 rows) with ncolumns, where ncolumns >= 0.  
 	If ncolumns > 0, then set all cells to 0.
@@ -178,7 +159,6 @@ Mat4* mat4_mult(Mat4* tmatrix, Mat4* imatrix) {
         }
         r++;
         c = 0;
-        printf("\n");
     }
     return result;
 }

@@ -10,57 +10,55 @@
 int* pixels;
 int dxmax;
 int dymax;
+
 void drawLine(int, int, int, int);
+void swap(int*,int*);
+
+void swap(int* a, int* b) {
+    int placeholder = *a;
+    *a = *b;
+    *b = placeholder;
+}
 
 void drawLine(int x1, int y1, int x2, int y2) {
-    int placeholder = 0, acc = 0, delta = 0, x, y, up, right,
-        partnerx, partnery, partnerpixel;
+    int acc = 0, delta = 0, x, y, up, right,
+        partnerx, partnery, partnerpixel, hold;
     float antialias;
 
-    if (x1 == x2 && y1 == y2) { // start and end point are same 
+    if (x1 == x2 && y1 == y2) { // draw pixel if start and end point are same
         pixels(y1,x1) = 255;
     } else if (abs(x1 - x2) >= abs(y1 - y2)) { // going in the x dir
 
         if (x1 > x2) { // swaps points so you're going to the right
-            placeholder = x2;
-            x2 = x1;
-            x1 = placeholder;
-            placeholder = y2;
-            y2 = y1;
-            y1 = placeholder;
+            swap(&x1, &x2);
+            swap(&y1, &y2);
         }
-        delta = abs(x2 - x1);
+
+        delta = abs(x2 - x1); // initialize delta and pos values
         x = x1;
         y = y1;
-        up = (y2 < y1);
-
-        /* 
-            note that in the bresenham, the acc value holds the amount of accumulation before the pixel switches
-            x-cor. In the antialiased version, the acc value should be used (by seeing how close it is to delta)
-            to calculate how dark the two pixels in each pixel-pair should be. 
-            Again, like the bresenham, this is much more of an approximation than anything else.
-            Note that for perfectly diagonal lines, the algorithm will produce about the same result.
-        */                
+        up = (y2 < y1);             
 
         while (x <= x2) { // This is the drawing function 
-            pixels(y,x) = 255;
-    
-            // the partner of the current pixel is at (x,y), (x,y+1) if DOWN, (x,y-1) if UP. (unless acc = 0)
             partnerx = x, partnery = y;
-            partnerpixel = pixels(partnery,partnerx);
-            if (acc) {
+            if (acc) { // if there's acc, we need to change partnerp and pixel.
+                // the partner of the current pixel is at (x,y), (x,y+1) if DOWN, (x,y-1) if UP. (unless acc = 0)
                 if (up && y > 0)
                     partnery = y - 1;
                 else if (y < dymax)
                     partnery = y + 1;
 
-                antialias = (float) (delta - acc) / (float) (delta);
-                antialias = pow(antialias, .75);
-                pixels(y,x) = (int) ( (float) pixels(y,x) * antialias);
+                hold = 255 - pixels(y,x);
+                antialias = (float) (delta - acc) / (float) (delta); // which pixel is closer linearlly
+                antialias = pow(antialias, .75);                    // scales brightness
+                pixels(y,x) = (int) ( antialias * (float) hold) + pixels(y,x);
 
+                hold = 255 - pixels(partnery, partnerx);
                 antialias = (float) (acc) / (float) (delta);
                 antialias = pow(antialias, .75);
-                partnerpixel = (int) ( (float) partnerpixel * antialias);
+                partnerpixel = (int) ( antialias * (float) hold) + pixels(partnery,partnerx);
+            } else {
+                pixels(y,x) = 255;
             }
             pixels(partnery,partnerx) = partnerpixel;
 
@@ -78,38 +76,36 @@ void drawLine(int x1, int y1, int x2, int y2) {
     } else if (abs(x1 - x2) < abs(y1 - y2)) { // going in the y dir 
 
         if (y1 > y2) { // swaps points so that you're going down
-            placeholder = x2;
-            x2 = x1;
-            x1 = placeholder;
-            placeholder = y2;
-            y2 = y1;
-            y1 = placeholder;
+            swap(&x1, &x2);
+            swap(&y1, &y2);
         }
-        delta = abs(y2 - y1);
+
+        delta = abs(y2 - y1); // setup delta, pos, and variables
         x = x1;
         y = y1;
-
         right = (x2 > x1);
 
-        while (y <= y2) { 
-            pixels(y,x) = 255; 
+        while (y <= y2) { // drawing function
             partnerx = x, partnery = y;
 
-            partnerpixel = pixels(partnery,partnerx);
-
-            if (acc) {
+            if (acc) {  // sets up correct partner pixel coords
                 if (right && x < 499)
                     partnerx = x + 1;
                 else if (x > 0)
                     partnerx = x - 1;
 
+                hold = 255 - pixels(y,x);
                 antialias = (float) (delta - acc) / (float) (delta);
                 antialias = pow(antialias, .75);
-                pixels(y,x) = (int) ( (float) pixels(y,x) * antialias);
+                pixels(y,x) = (int) ( antialias * (float) hold) + pixels(y,x);
 
+                hold = 255 - pixels(partnery,partnerx);
                 antialias = (float) (acc) / (float) (delta);
                 antialias = pow(antialias, .75);
-                partnerpixel = (int) ( (float) partnerpixel * antialias);
+                partnerpixel = (int) ( antialias * (float) hold) + pixels(partnery, partnerx);
+
+            } else {
+                pixels(y,x) = 255; // if the pixel is perfectly aligned with the liene to draw
             }
             pixels(partnery,partnerx) = partnerpixel;
 
@@ -132,7 +128,7 @@ int main(int argc, char* argv[]) {
     int x = 0, y = 0, // standard graphics coordinate system. (origin at top left)
         x1 = 0, y1 = 0, x2 = 0, y2 = 0,
         render, ii = 0, 
-        rx, ry, z1, z2, rz;
+        rx, ry, z1, z2, rz, i;
     init();
     Mat4* render_holder;
     double sxmin, sxmax, symin, symax,
@@ -160,15 +156,19 @@ int main(int argc, char* argv[]) {
         inputargc = parse_numwords(inputargv);
         x = y = 0;
 
-        printf("%s\n", inputargv[0]);
+        printf("%s", inputargv[0]);
 
         if (strcmp(inputargv[0],"#") == 0) {
+            printf(" comment:");
+            for (i = 1; i < inputargc; i++) {
+                printf(" %s", inputargv[i]);
+            }
         } else if (strcmp(inputargv[0],"line") == 0) {
             addline(atof(inputargv[1]), atof(inputargv[2]), atof(inputargv[3]), atof(inputargv[4]), atof(inputargv[5]), atof(inputargv[6]));
-            printf(": %f, %f, %f : %f, %f, %f", atof(inputargv[1]), atof(inputargv[2]), atof(inputargv[3]), atof(inputargv[4]), atof(inputargv[5]), atof(inputargv[6]));
+            printf(": %5.2f, %5.2f, %5.2f : %5.2f, %5.2f, %5.2f", atof(inputargv[1]), atof(inputargv[2]), atof(inputargv[3]), atof(inputargv[4]), atof(inputargv[5]), atof(inputargv[6]));
         } else if (strcmp(inputargv[0],"sphere") == 0) {
-
-
+            printf(": SPHERE DRAWING NOT IMPLEMENTED");
+            // not implemented
         } else if (strcmp(inputargv[0],"identity") == 0) {
             mat4_delete(tmatrix);
             tmatrix = identity();
@@ -205,7 +205,7 @@ int main(int argc, char* argv[]) {
             transform();
             tmatrix = render_holder;
         } else if (strcmp(inputargv[0],"render-perspective-stereo") == 0) { // note: you need to draw twice for this. Make drawing its own function.
-            reyex = atof(inputargv[1]);
+            reyex = atof(inputargv[1]); // NOTE: not yet implemented
             reyey = atof(inputargv[2]);
             reyez = atof(inputargv[3]);
             leyex = atof(inputargv[4]);
@@ -231,6 +231,7 @@ int main(int argc, char* argv[]) {
         } else if (strcmp(inputargv[0],"file") == 0) {
             filename = inputargv[1];
         } else if (strcmp(inputargv[0],"end") == 0) {
+            printf(" read from input...\n");
             goto draw;
         } else {
             printf("Unknown command encountered: |%s|\n", inputargv[0]);
@@ -242,7 +243,6 @@ int main(int argc, char* argv[]) {
     // drawinggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
 
     draw: printf("drawing...\n");
-    print(ematrix);
 
     x = 0;
     y = 0;
@@ -270,10 +270,6 @@ int main(int argc, char* argv[]) {
                 rx = (int) ((reyex * dxmax) / (sxmax - sxmin)  + dxmax / 2);
                 ry = (int) ((reyey * dymax) / (symax - symin)  + dymax / 2);
                 rz = (int) ((reyez * dxmax) / (sxmax - sxmin));
-                printf("\neyecor: %d, %d, %d\n", rx, ry, rz);
-                printf("before and after:\n");
-                printf("%d, %d, %d: %d, %d, %d\n", x1, y1, z1, x2, y2, z2);
-
 
                 x1 = rx - (int) mat4_get(ematrix, 0, ii);
                 y1 = ry + (int) mat4_get(ematrix, 1, ii);
@@ -286,11 +282,6 @@ int main(int argc, char* argv[]) {
                 y1 = ry - y1 * rz / (rz - z1);
                 x2 = rx - x2 * rz / (rz - z2);
                 y2 = ry - y2 * rz / (rz - z2);
-
-                printf("%d, %d, %d: %d, %d, %d\n", x1, y1, z1, x2, y2, z2);
-
-                // y1 = 0 - y1;
-                // y2 = 0 - y2;
 
                 break;
             case 2: // stereo
@@ -318,7 +309,7 @@ int main(int argc, char* argv[]) {
 
     printf("saving to ppm...\n");
 
-    FILE *fp = fopen(filename, "w"); //this needs to be fixed
+    FILE *fp = fopen(filename, "w"); //  initializes file
     fputs("P3\n", fp);
     char* sizes = calloc(sizeof(char), 32);
     sprintf(sizes, "%d %d\n", dxmax+1, dymax+1);
@@ -327,7 +318,8 @@ int main(int argc, char* argv[]) {
     char* pixelstr = calloc(sizeof(char), 2048);
 
     x = y = 0;
-    while (y < dymax+1) {
+
+    while (y < dymax+1) { // puts pixel information into file.
         while (x < dxmax+1) {
             sprintf(pixelstr, "%d %d %d ", pixels(y,x), pixels(y,x), pixels(y,x));
             fputs(pixelstr, fp);

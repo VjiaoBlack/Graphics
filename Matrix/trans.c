@@ -1,16 +1,7 @@
 #import "trans.h"
 
-// int main(int argc, char* argv[]) {
-//     init();
-//     return 1;
-// }
-
 void combine(Mat4* new) {
     tmatrix = mat4_mult(new, tmatrix);
-    // print(new);
-    // printf("\n");
-    // print(tmatrix);
-    //tmatrix = new;
 }
 
 void init() { // initializes tmatrix to default value and ematrix.
@@ -76,7 +67,6 @@ void rotate(char axis, int degrees) {
     double c = cos(radians);
     double s = sin(radians);
     Mat4* new = identity();
-    printf("rotating...\n");
 
     switch(axis) {
         case 'x':
