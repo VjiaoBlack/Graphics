@@ -19,4 +19,5 @@ void scale(double, double, double);
 void rotate(char, int);
 void combine(Mat4*);
 void transform();
-void sphere(int,int,int,int);
+void sphere(double, double, double, double);
+double deg_to_rad(int);

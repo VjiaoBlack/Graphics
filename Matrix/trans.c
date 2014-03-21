@@ -98,7 +98,62 @@ void transform() {
     return;
 }
 
-void sphere(int r, int cx, int cy, int cz) {
+void sphere(double r, double cx, double cy, double cz) {
+    int theta; // angle from x axis
+    int phi; // angle from z axis
+    double x1, y1, z1, x2, y2, z2;
+    double t, p;
+
+
+    for (theta = 0; theta < 180; theta += 15) { // vertical circle (longitude) rotates around z axis.
+        for (phi = 0; phi <= 360; phi += 15) { // the point goes from top of the cricle, around, back to the top.
+            // set p 2 to current
+            t = deg_to_rad(theta);
+            p = deg_to_rad(phi);
+            x2 = r * sin(p) * cos(t) + cx;
+            y2 = r * sin(p) * sin(t) + cy;
+            z2 = r * cos(p) + cz;
+
+            // if not beginning, put points in ematrix
+            if (phi != 0) {
+                addline(x1, y1, z1, x2, y2, z2);
+                printf("%f  %f  %f: %f   %f   %f   \n",x1,y1,z1,x2,y2,z2);
+            }
+
+            // set p 1
+            x1 = r * sin(p) * cos(t) + cx;
+            y1 = r * sin(p) * sin(t) + cy;
+            z1 = r * cos(p) + cz;
+
+            
+        }
+    }
     
+    for (phi = 0; phi < 180; phi += 15) { // draw sphere horizontal slice
+        for (theta = 0; theta <= 360; theta += 15) { // the point goes from top of the cricle, around, back to the top.
+            // set p 2 to current
+            t = deg_to_rad(theta);
+            p = deg_to_rad(phi);
+            x2 = r * sin(p) * cos(t) + cx;
+            y2 = r * sin(p) * sin(t) + cy;
+            z2 = r * cos(p) + cz;
+
+            // if both, put points in ematrix
+            if (theta != 0) {
+                addline(x1, y1, z1, x2, y2, z2);
+            }
+
+            // set p 1
+            x1 = r * sin(p) * cos(t) + cx;
+            y1 = r * sin(p) * sin(t) + cy;
+            z1 = r * cos(p) + cz;
+
+            
+        }
+    }
+}
+
+double deg_to_rad(int deg) {
+    return (double) ((deg * M_PI) / 180);
 }
 

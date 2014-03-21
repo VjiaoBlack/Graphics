@@ -15,11 +15,20 @@
 // for some slanted lines (seems to be those nearest 45 degrees with the most probs, as expected.)
 
 #define pixels(y,x) pixels[y*dxmax + x]
-int* pixels;
+
+typedef struct pixel_t {
+    int r;
+    int g;
+    int b;
+} pixel_t;
+
+
+
+pixel_t* pixels;
 int dxmax;
 int dymax;
 
-void drawLine(int, int, int, int);
+void drawLine(int, int, int, int, int, int, int);
 void swap(int*,int*);
 
 void swap(int* a, int* b) {
@@ -28,14 +37,19 @@ void swap(int* a, int* b) {
     *b = placeholder;
 }
 
-void drawLine(int x1, int y1, int x2, int y2) {
+void drawLine(int x1, int y1, int x2, int y2, int r, int g, int b) { // 0 for white, 1 for red, 2 for cyan.
     int acc = 0, delta = 0, x, y, up, right,
-        partnerx, partnery, partnerpixel, hold;
+        partnerx, partnery, holdr, holdg, holdb;
     float antialias;
+    pixel_t partnerpixel;
 
     if (x1 == x2 && y1 == y2) { // draw pixel if start and end point are same
-        pixels(y1,x1) = 255;
+        pixels(y1,x1) = (pixel_t) {r,g,b};
     } else if (abs(x1 - x2) >= abs(y1 - y2)) { // going in the x dir
+
+        if (abs(x1-x2) == abs(y1-y2)) {
+            printf("color:%d, %d, %d\n", r, g, b);
+        }
 
         if (x1 > x2) { // swaps points so you're going to the right
             swap(&x1, &x2);
@@ -56,38 +70,65 @@ void drawLine(int x1, int y1, int x2, int y2) {
                 else if (y < dymax)
                     partnery = y + 1;
 
+                // hold is the max value of color that the new part of the pixel can take (on top of bkgrd color)
+                holdr = abs(r - pixels(y,x).r);
+                holdg = abs(g - pixels(y,x).g);
+                holdb = abs(b - pixels(y,x).b);
 
+                // this following should not be necessary. It's a catch that catches too-high values...
+                if (pixels(y,x).r > r)
+                    pixels(y,x).r = r;
+                if (pixels(y,x).g > g)
+                    pixels(y,x).g = g;
+                if (pixels(y,x).b > b)
+                    pixels(y,x).b = b;
 
-                hold = 255 - pixels(y,x);
-
-                if (pixels(y,x) > 255)
-                    pixels(y,x) = 255;
                 antialias = (float) (delta - acc) / (float) (delta); // which pixel is closer linearlly
-                antialias = pow(antialias, .70);                    // scales brightness
-                pixels(y,x) = (int) ( antialias * (float) hold) + pixels(y,x);
+                antialias = pow(antialias, .70);                     // scales brightness
 
-                if (x == 304 && y == 264) {
-                    printf("test: %d at %d, %d\n", pixels(y,x), x, y);
-                }
+                // the following sets the pixel's color values to those modified by antialias, and then added back on to their original values.
+                pixels(y,x).r = (int) ( antialias * (float) holdr) + pixels(y,x).r;
+                pixels(y,x).g = (int) ( antialias * (float) holdg) + pixels(y,x).g;
+                pixels(y,x).b = (int) ( antialias * (float) holdb) + pixels(y,x).b;
 
-                if (pixels(partnery,partnerx) > 255)
-                    pixels(partnery,partnerx) = 255;
-                hold = 255 - pixels(partnery, partnerx);
-                if (pixels(partnery,partnerx) > 255) {
-                    printf("failure at %d, %d with %d\n", partnerx, partnery, pixels(partnery,partnerx));
-                }
+                // this following should not be necessary, It's a catch that catches too-high values...
+                if (pixels(partnery,partnerx).r > r)
+                    pixels(partnery,partnerx).r = r;
+                if (pixels(partnery,partnerx).g > g)
+                    pixels(partnery,partnerx).g = g;
+                if (pixels(partnery,partnerx).b > b)
+                    pixels(partnery,partnerx).b = b;
+
+                // this sets the hold to themax color values the new pixel can have.
+                holdr = abs(r - pixels(partnery, partnerx).r);
+                holdg = abs(g - pixels(partnery, partnerx).g);
+                holdb = abs(b - pixels(partnery, partnerx).b);
+
+                // these sets antialias values.
                 antialias = (float) (acc) / (float) (delta);
                 antialias = pow(antialias, .70);
-                partnerpixel = (int) ( antialias * (float) hold) + pixels(partnery,partnerx);
 
-                if (partnerx == 304 && partnery == 264) {
-                    printf("ptest: %d at %d, %d\n", pixels(partnery,partnerx), partnerx, partnery);
-                    printf("  data: hold,%d; anti,%f;\n", hold, antialias);
-                }
+                partnerpixel = (pixel_t) {r,g,b}; // makes a pixel_t in partnerpixel
+
+                // the following sets the partnerpxiel to antialiased color, plus the original background color.
+                partnerpixel.r = (int) ( antialias * (float) holdr) + pixels(partnery,partnerx).r;
+                partnerpixel.g = (int) ( antialias * (float) holdg) + pixels(partnery,partnerx).g;
+                partnerpixel.b = (int) ( antialias * (float) holdb) + pixels(partnery,partnerx).b;
+
             } else {
-                pixels(y,x) = 255;
+                pixels(y,x).r = r;
+                pixels(y,x).g = g;
+                pixels(y,x).b = b;
             }
-            pixels(partnery,partnerx) = partnerpixel;
+            pixels(partnery,partnerx).r = partnerpixel.r;
+            pixels(partnery,partnerx).g = partnerpixel.g;
+            pixels(partnery,partnerx).b = partnerpixel.b;
+
+            // aliased 
+            // pixels(y,x).r = r;
+            // pixels(y,x).g = g;
+            // pixels(y,x).b = b;
+
 
             acc += abs(y2 - y1);
             if (acc >= delta) {
@@ -121,28 +162,57 @@ void drawLine(int x1, int y1, int x2, int y2) {
                 else if (x > 0)
                     partnerx = x - 1;
 
-                if (pixels(y,x) > 255)
-                pixels(y,x) = 255;
-                hold = 255 - pixels(y,x);
+                if (pixels(y,x).r > r)
+                    pixels(y,x).r = r;
+                if (pixels(y,x).g > g)
+                    pixels(y,x).g = g;
+                if (pixels(y,x).b > b)
+                    pixels(y,x).b = b;
+
+                holdr = abs(r - pixels(y,x).r);
+                holdg = abs(g - pixels(y,x).g);
+                holdb = abs(b - pixels(y,x).b);
 
                 antialias = (float) (delta - acc) / (float) (delta);
                 antialias = pow(antialias, .70);
-                pixels(y,x) = (int) ( antialias * (float) hold) + pixels(y,x);
 
-                if (y == 264 && (x == 304))
-                    printf("test: %d at %d, %d\n", pixels(y,x), x, y);
+                pixels(y,x).r = (int) ( antialias * (float) holdr) + pixels(y,x).r; // can this possibly give us the wrong value?
+                pixels(y,x).g = (int) ( antialias * (float) holdg) + pixels(y,x).g;
+                pixels(y,x).b = (int) ( antialias * (float) holdb) + pixels(y,x).b;
                
-                if (pixels(partnery,partnerx) > 255)
-                pixels(partnery,partnerx) = 255;
-                hold = 255 - pixels(partnery,partnerx);
+                if (pixels(partnery,partnerx).r > r)
+                    pixels(partnery,partnerx).r = r;
+                if (pixels(partnery,partnerx).g > g)
+                    pixels(partnery,partnerx).g = g;
+                if (pixels(partnery,partnerx).b > b)
+                    pixels(partnery,partnerx).b = b;
+
+                holdr = abs(r - pixels(partnery,partnerx).r);
+                holdg = abs(g - pixels(partnery,partnerx).g);
+                holdb = abs(b - pixels(partnery,partnerx).b);
+
                 antialias = (float) (acc) / (float) (delta);
                 antialias = pow(antialias, .70);
-                partnerpixel = (int) ( antialias * (float) hold) + pixels(partnery, partnerx);
+                partnerpixel = (pixel_t) {r,g,b};
+                partnerpixel.r = (int) ( antialias * (float) holdr) + pixels(partnery, partnerx).r;
+                partnerpixel.g = (int) ( antialias * (float) holdg) + pixels(partnery, partnerx).g;
+                partnerpixel.b = (int) ( antialias * (float) holdb) + pixels(partnery, partnerx).b;
             } else {
-                pixels(y,x) = 255; // if the pixel is perfectly aligned with the liene to draw
+                pixels(y,x).r = r; // if the pixel is perfectly aligned with the liene to draw
+                pixels(y,x).g = g;
+                pixels(y,x).b = b;
             }
 
-            pixels(partnery,partnerx) = partnerpixel;
+            pixels(partnery,partnerx).r = partnerpixel.r;
+            pixels(partnery,partnerx).g = partnerpixel.g;
+            pixels(partnery,partnerx).b = partnerpixel.b;
+
+            // aliased
+            // pixels(y,x).r = r;
+            // pixels(y,x).g = g;
+            // pixels(y,x).b = b;
+
+
 
             acc += abs(x2 - x1);
             if (acc >= delta) {
@@ -163,7 +233,8 @@ int main(int argc, char* argv[]) {
     int x = 0, y = 0, // standard graphics coordinate system. (origin at top left)
         x1 = 0, y1 = 0, x2 = 0, y2 = 0,
         render, ii = 0, 
-        rx, ry, z1, z2, rz, i;
+        rx1, ry1, z1, z2, rz1, i, rx2, ry2, rz2, rx, ry, rz, 
+        x3 = 0, y3 = 0, z3 = 0, x4 = 0, y4 = 0, z4 = 0;
     init();
     Mat4* render_holder;
     double sxmin, sxmax, symin, symax,
@@ -200,10 +271,7 @@ int main(int argc, char* argv[]) {
             }
         } else if (strcmp(inputargv[0],"line") == 0) {
             addline(atof(inputargv[1]), atof(inputargv[2]), atof(inputargv[3]), atof(inputargv[4]), atof(inputargv[5]), atof(inputargv[6]));
-            printf(": %5.2f, %5.2f, %5.2f : %5.2f, %5.2f, %5.2f", atof(inputargv[1]), atof(inputargv[2]), atof(inputargv[3]), atof(inputargv[4]), atof(inputargv[5]), atof(inputargv[6]));
-        } else if (strcmp(inputargv[0],"sphere") == 0) {
-            printf(": SPHERE DRAWING NOT IMPLEMENTED");
-            // not implemented
+            //printf(": %5.2f, %5.2f, %5.2f : %5.2f, %5.2f, %5.2f", atof(inputargv[1]), atof(inputargv[2]), atof(inputargv[3]), atof(inputargv[4]), atof(inputargv[5]), atof(inputargv[6]));
         } else if (strcmp(inputargv[0],"identity") == 0) {
             mat4_delete(tmatrix);
             tmatrix = identity();
@@ -268,6 +336,8 @@ int main(int argc, char* argv[]) {
         } else if (strcmp(inputargv[0],"end") == 0) {
             printf(" read from input...\n");
             goto draw;
+        } else if (strcmp(inputargv[0],"sphere") == 0) {
+            sphere(atof(inputargv[1]), atof(inputargv[2]), atof(inputargv[3]), atof(inputargv[4]));
         } else {
             printf("Unknown command encountered: |%s|\n", inputargv[0]);
         }
@@ -281,10 +351,10 @@ int main(int argc, char* argv[]) {
 
     x = 0;
     y = 0;
-    pixels = calloc(dxmax * dymax, sizeof(int));
+    pixels = calloc(dxmax * dymax, sizeof(pixel_t));
     while (y < dymax) {
         while (x < dxmax) {
-            pixels[y*dxmax + x] = 0;
+            pixels[y*dxmax + x] = (pixel_t) {0,0,0};
             x++;
         }
         x = 0;
@@ -300,6 +370,8 @@ int main(int argc, char* argv[]) {
                 y1 = 0 - (int) mat4_get(ematrix, 1, ii);
                 x2 = (int) mat4_get(ematrix, 0, ii+1);
                 y2 = 0 - (int) mat4_get(ematrix, 1, ii+1);
+                //printf("drawing line %d, %d : %d, %d\n", x1, y1, x2, y2);
+                drawLine(x1, y1, x2, y2,255,255,255);
                 break;
             case 1: // cyclops
                 rx = (int) ((reyex * dxmax) / (sxmax - sxmin)  + dxmax / 2);
@@ -317,18 +389,49 @@ int main(int argc, char* argv[]) {
                 y1 = ry - y1 * rz / (rz - z1);
                 x2 = rx - x2 * rz / (rz - z2);
                 y2 = ry - y2 * rz / (rz - z2);
+                //printf("drawing line %d, %d : %d, %d\n", x1, y1, x2, y2);
+                drawLine(x1, y1, x2, y2, 255,255,255);
 
                 break;
             case 2: // stereo
-                x1 = (int) ( (mat4_get(ematrix, 0, ii) * reyez) / (mat4_get(ematrix, 2, ii) * reyez) );
-                y1 = 0 - (int) ( (mat4_get(ematrix, 1, ii) * reyez) / (mat4_get(ematrix, 2, ii) * reyez) );
-                x2 = (int) ( (mat4_get(ematrix, 0, ii+1) * reyez) / (mat4_get(ematrix, 2, ii+1) * reyez) );
-                y2 = 0 - (int) ( (mat4_get(ematrix, 1, ii+1) * reyez) / (mat4_get(ematrix, 2, ii+1) * reyez) );
-                // following does not yet work
-                // x3 = (int) ( (mat4_get(ematrix, 0, ii) * leyez) / (mat4_get(ematrix, 2, ii) * leyez);
-                // y3 = (int) ( (mat4_get(ematrix, 1, ii) * leyez) / (mat4_get(ematrix, 2, ii) * leyez);
-                // x4 = (int) ( (mat4_get(ematrix, 0, ii+1) * leyez) / (mat4_get(ematrix, 2, ii+1) * leyez);
-                // y4 = (int) ( (mat4_get(ematrix, 1, ii+1) * leyez) / (mat4_get(ematrix, 2, ii+1) * leyez);
+                rx1 = (int) ((reyex * dxmax) / (sxmax - sxmin)  + dxmax / 2);
+                ry1 = (int) ((reyey * dymax) / (symax - symin)  + dymax / 2);
+                rz1 = (int) ((reyez * dxmax) / (sxmax - sxmin));
+
+                x1 = rx1 - (int) mat4_get(ematrix, 0, ii);
+                y1 = ry1 + (int) mat4_get(ematrix, 1, ii);
+                z1 = mat4_get(ematrix, 2, ii);
+                x2 = rx1 - (int) mat4_get(ematrix, 0, ii+1);
+                y2 = ry1 + (int) mat4_get(ematrix, 1, ii+1);
+                z2 = mat4_get(ematrix, 2, ii+1);
+
+                x1 = rx1 - x1 * rz1 / (rz1 - z1);
+                y1 = ry1 - y1 * rz1 / (rz1 - z1);
+                x2 = rx1 - x2 * rz1 / (rz1 - z2);
+                y2 = ry1 - y2 * rz1 / (rz1 - z2);
+                //printf("drawing line %d, %d : %d, %d\n", x1, y1, x2, y2);
+                drawLine(x1, y1, x2, y2, 255,0,0);
+
+
+                rx2 = (int) ((leyex * dxmax) / (sxmax - sxmin)  + dxmax / 2);
+                ry2 = (int) ((leyey * dymax) / (symax - symin)  + dymax / 2);
+                rz2 = (int) ((leyez * dxmax) / (sxmax - sxmin));
+
+                x3 = rx2 - (int) mat4_get(ematrix, 0, ii);
+                y3 = ry2 + (int) mat4_get(ematrix, 1, ii);
+                z3 = mat4_get(ematrix, 2, ii);
+                x4 = rx2 - (int) mat4_get(ematrix, 0, ii+1);
+                y4 = ry2 + (int) mat4_get(ematrix, 1, ii+1);
+                z4 = mat4_get(ematrix, 2, ii+1);
+
+                x3 = rx2 - x3 * rz2 / (rz2 - z3);
+                y3 = ry2 - y3 * rz2 / (rz2 - z3);
+                x4 = rx2 - x4 * rz2 / (rz2 - z4);
+                y4 = ry2 - y4 * rz2 / (rz2 - z4);
+                //printf("drawing line %d, %d : %d, %d\n", x3, y3, x4, y4);
+                drawLine(x3, y3, x4, y4, 0,180,180);
+
+
                 break;
         }
         ii += 2;
@@ -337,8 +440,6 @@ int main(int argc, char* argv[]) {
         y = 0;
         //if (x1 > dxmax || x2 > dxmax || x2 < 0 || x1 < 0 || y1 > dymax || y2 > dymax || y1 < 0 || y2 < 0) 
             //continue;
-        printf("drawing line %d, %d : %d, %d\n", x1, y1, x2, y2);
-        drawLine(x1, y1, x2, y2);
         x = y = 0;
     }
 
@@ -356,7 +457,7 @@ int main(int argc, char* argv[]) {
 
     while (y < dymax+1) { // puts pixel information into file.
         while (x < dxmax+1) {
-            sprintf(pixelstr, "%d %d %d ", pixels(y,x), pixels(y,x), pixels(y,x));
+            sprintf(pixelstr, "%d %d %d ", pixels(y,x).r, pixels(y,x).g, pixels(y,x).b);
             fputs(pixelstr, fp);
             fflush(fp);
             x++;
