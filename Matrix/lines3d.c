@@ -76,12 +76,12 @@ void drawLine(int x1, int y1, int x2, int y2, int r, int g, int b) { // 0 for wh
                 holdb = abs(b - pixels(y,x).b);
 
                 // this following should not be necessary. It's a catch that catches too-high values...
-                if (pixels(y,x).r > r)
-                    pixels(y,x).r = r;
-                if (pixels(y,x).g > g)
-                    pixels(y,x).g = g;
-                if (pixels(y,x).b > b)
-                    pixels(y,x).b = b;
+                if (pixels(y,x).r > 255)
+                    pixels(y,x).r = 255;
+                if (pixels(y,x).g > 255)
+                    pixels(y,x).g = 255;
+                if (pixels(y,x).b > 255)
+                    pixels(y,x).b = 255;
 
                 antialias = (float) (delta - acc) / (float) (delta); // which pixel is closer linearlly
                 antialias = pow(antialias, .70);                     // scales brightness
@@ -90,14 +90,20 @@ void drawLine(int x1, int y1, int x2, int y2, int r, int g, int b) { // 0 for wh
                 pixels(y,x).r = (int) ( antialias * (float) holdr) + pixels(y,x).r;
                 pixels(y,x).g = (int) ( antialias * (float) holdg) + pixels(y,x).g;
                 pixels(y,x).b = (int) ( antialias * (float) holdb) + pixels(y,x).b;
+                if (pixels(y,x).r > 255)
+                    pixels(y,x).r = 255;
+                if (pixels(y,x).g > 255)
+                    pixels(y,x).g = 255;
+                if (pixels(y,x).b > 255)
+                    pixels(y,x).b = 255;
 
                 // this following should not be necessary, It's a catch that catches too-high values...
-                if (pixels(partnery,partnerx).r > r)
-                    pixels(partnery,partnerx).r = r;
-                if (pixels(partnery,partnerx).g > g)
-                    pixels(partnery,partnerx).g = g;
-                if (pixels(partnery,partnerx).b > b)
-                    pixels(partnery,partnerx).b = b;
+                if (pixels(partnery,partnerx).r > 255)
+                    pixels(partnery,partnerx).r = 255;
+                if (pixels(partnery,partnerx).g > 255)
+                    pixels(partnery,partnerx).g = 255;
+                if (pixels(partnery,partnerx).b > 255)
+                    pixels(partnery,partnerx).b = 255;
 
                 // this sets the hold to themax color values the new pixel can have.
                 holdr = abs(r - pixels(partnery, partnerx).r);
@@ -115,14 +121,31 @@ void drawLine(int x1, int y1, int x2, int y2, int r, int g, int b) { // 0 for wh
                 partnerpixel.g = (int) ( antialias * (float) holdg) + pixels(partnery,partnerx).g;
                 partnerpixel.b = (int) ( antialias * (float) holdb) + pixels(partnery,partnerx).b;
 
+                pixels(partnery,partnerx).r = partnerpixel.r;
+                pixels(partnery,partnerx).g = partnerpixel.g;
+                pixels(partnery,partnerx).b = partnerpixel.b;
+                if (pixels(partnery,partnerx).r > 255)
+                    pixels(partnery,partnerx).r = 255;
+                if (pixels(partnery,partnerx).g > 255)
+                    pixels(partnery,partnerx).g = 255;
+                if (pixels(partnery,partnerx).b > 255)
+                    pixels(partnery,partnerx).b = 255;
+
             } else {
-                pixels(y,x).r = r;
-                pixels(y,x).g = g;
-                pixels(y,x).b = b;
+                holdr = abs(r - pixels(y,x).r);
+                holdg = abs(g - pixels(y,x).g);
+                holdb = abs(b - pixels(y,x).b);
+                pixels(y,x).r = pixels(y,x).r + holdr;
+                pixels(y,x).g = pixels(y,x).g + holdg;
+                pixels(y,x).b = pixels(y,x).b + holdb;
+                if (pixels(y,x).r > 255)
+                    pixels(y,x).r = 255;
+                if (pixels(y,x).g > 255)
+                    pixels(y,x).g = 255;
+                if (pixels(y,x).b > 255)
+                    pixels(y,x).b = 255;
             }
-            pixels(partnery,partnerx).r = partnerpixel.r;
-            pixels(partnery,partnerx).g = partnerpixel.g;
-            pixels(partnery,partnerx).b = partnerpixel.b;
+            
 
             // aliased 
             // pixels(y,x).r = r;
@@ -162,12 +185,12 @@ void drawLine(int x1, int y1, int x2, int y2, int r, int g, int b) { // 0 for wh
                 else if (x > 0)
                     partnerx = x - 1;
 
-                if (pixels(y,x).r > r)
-                    pixels(y,x).r = r;
-                if (pixels(y,x).g > g)
-                    pixels(y,x).g = g;
-                if (pixels(y,x).b > b)
-                    pixels(y,x).b = b;
+                if (pixels(y,x).r > 255)
+                    pixels(y,x).r = 255;
+                if (pixels(y,x).g > 255)
+                    pixels(y,x).g = 255;
+                if (pixels(y,x).b > 255)
+                    pixels(y,x).b = 255;
 
                 holdr = abs(r - pixels(y,x).r);
                 holdg = abs(g - pixels(y,x).g);
@@ -179,13 +202,19 @@ void drawLine(int x1, int y1, int x2, int y2, int r, int g, int b) { // 0 for wh
                 pixels(y,x).r = (int) ( antialias * (float) holdr) + pixels(y,x).r; // can this possibly give us the wrong value?
                 pixels(y,x).g = (int) ( antialias * (float) holdg) + pixels(y,x).g;
                 pixels(y,x).b = (int) ( antialias * (float) holdb) + pixels(y,x).b;
+                if (pixels(y,x).r > 255)
+                    pixels(y,x).r = 255;
+                if (pixels(y,x).g > 255)
+                    pixels(y,x).g = 255;
+                if (pixels(y,x).b > 255)
+                    pixels(y,x).b = 255;
                
-                if (pixels(partnery,partnerx).r > r)
-                    pixels(partnery,partnerx).r = r;
-                if (pixels(partnery,partnerx).g > g)
-                    pixels(partnery,partnerx).g = g;
-                if (pixels(partnery,partnerx).b > b)
-                    pixels(partnery,partnerx).b = b;
+                if (pixels(partnery,partnerx).r > 255)
+                    pixels(partnery,partnerx).r = 255;
+                if (pixels(partnery,partnerx).g > 255)
+                    pixels(partnery,partnerx).g = 255;
+                if (pixels(partnery,partnerx).b > 255)
+                    pixels(partnery,partnerx).b = 255;
 
                 holdr = abs(r - pixels(partnery,partnerx).r);
                 holdg = abs(g - pixels(partnery,partnerx).g);
@@ -197,15 +226,30 @@ void drawLine(int x1, int y1, int x2, int y2, int r, int g, int b) { // 0 for wh
                 partnerpixel.r = (int) ( antialias * (float) holdr) + pixels(partnery, partnerx).r;
                 partnerpixel.g = (int) ( antialias * (float) holdg) + pixels(partnery, partnerx).g;
                 partnerpixel.b = (int) ( antialias * (float) holdb) + pixels(partnery, partnerx).b;
-            } else {
-                pixels(y,x).r = r; // if the pixel is perfectly aligned with the liene to draw
-                pixels(y,x).g = g;
-                pixels(y,x).b = b;
-            }
 
-            pixels(partnery,partnerx).r = partnerpixel.r;
-            pixels(partnery,partnerx).g = partnerpixel.g;
-            pixels(partnery,partnerx).b = partnerpixel.b;
+                pixels(partnery,partnerx).r = partnerpixel.r;
+                pixels(partnery,partnerx).g = partnerpixel.g;
+                pixels(partnery,partnerx).b = partnerpixel.b;
+                if (pixels(partnery,partnerx).r > 255)
+                    pixels(partnery,partnerx).r = 255;
+                if (pixels(partnery,partnerx).g > 255)
+                    pixels(partnery,partnerx).g = 255;
+                if (pixels(partnery,partnerx).b > 255)
+                    pixels(partnery,partnerx).b = 255;
+            } else {
+                holdr = abs(r - pixels(y,x).r);
+                holdg = abs(g - pixels(y,x).g);
+                holdb = abs(b - pixels(y,x).b);
+                pixels(y,x).r = pixels(y,x).r + holdr;
+                pixels(y,x).g = pixels(y,x).g + holdg;
+                pixels(y,x).b = pixels(y,x).b + holdb;
+                if (pixels(y,x).r > 255)
+                    pixels(y,x).r = 255;
+                if (pixels(y,x).g > 255)
+                    pixels(y,x).g = 255;
+                if (pixels(y,x).b > 255)
+                    pixels(y,x).b = 255;
+            }
 
             // aliased
             // pixels(y,x).r = r;
@@ -371,7 +415,7 @@ int main(int argc, char* argv[]) {
                 x2 = (int) mat4_get(ematrix, 0, ii+1);
                 y2 = 0 - (int) mat4_get(ematrix, 1, ii+1);
                 //printf("drawing line %d, %d : %d, %d\n", x1, y1, x2, y2);
-                drawLine(x1, y1, x2, y2,255,255,255);
+                drawLine(x1, y1, x2, y2,130,130,130);
                 break;
             case 1: // cyclops
                 rx = (int) ((reyex * dxmax) / (sxmax - sxmin)  + dxmax / 2);
@@ -390,7 +434,7 @@ int main(int argc, char* argv[]) {
                 x2 = rx - x2 * rz / (rz - z2);
                 y2 = ry - y2 * rz / (rz - z2);
                 //printf("drawing line %d, %d : %d, %d\n", x1, y1, x2, y2);
-                drawLine(x1, y1, x2, y2, 255,255,255);
+                drawLine(x1, y1, x2, y2, 130,130,130);
 
                 break;
             case 2: // stereo
@@ -410,7 +454,7 @@ int main(int argc, char* argv[]) {
                 x2 = rx1 - x2 * rz1 / (rz1 - z2);
                 y2 = ry1 - y2 * rz1 / (rz1 - z2);
                 //printf("drawing line %d, %d : %d, %d\n", x1, y1, x2, y2);
-                drawLine(x1, y1, x2, y2, 255,0,0);
+                drawLine(x1, y1, x2, y2, 130,0,0);
 
 
                 rx2 = (int) ((leyex * dxmax) / (sxmax - sxmin)  + dxmax / 2);
@@ -429,7 +473,7 @@ int main(int argc, char* argv[]) {
                 x4 = rx2 - x4 * rz2 / (rz2 - z4);
                 y4 = ry2 - y4 * rz2 / (rz2 - z4);
                 //printf("drawing line %d, %d : %d, %d\n", x3, y3, x4, y4);
-                drawLine(x3, y3, x4, y4, 0,180,180);
+                drawLine(x3, y3, x4, y4, 0,90,90);
 
 
                 break;
