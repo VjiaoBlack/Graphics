@@ -48,7 +48,7 @@ void drawLine(int x1, int y1, int x2, int y2, int r, int g, int b) { // 0 for wh
     } else if (abs(x1 - x2) >= abs(y1 - y2)) { // going in the x dir
 
         if (abs(x1-x2) == abs(y1-y2)) {
-            printf("color:%d, %d, %d\n", r, g, b);
+            // printf("color:%d, %d, %d\n", r, g, b);
         }
 
         if (x1 > x2) { // swaps points so you're going to the right
@@ -67,7 +67,7 @@ void drawLine(int x1, int y1, int x2, int y2, int r, int g, int b) { // 0 for wh
                 // the partner of the current pixel is at (x,y), (x,y+1) if DOWN, (x,y-1) if UP. (unless acc = 0)
                 if (up && y > 0)
                     partnery = y - 1;
-                else if (y < dymax)
+                else if (y < dymax - 1)
                     partnery = y + 1;
 
                 // hold is the max value of color that the new part of the pixel can take (on top of bkgrd color)
@@ -180,7 +180,7 @@ void drawLine(int x1, int y1, int x2, int y2, int r, int g, int b) { // 0 for wh
             partnerx = x, partnery = y;
 
             if (acc) {  // sets up correct partner pixel coords
-                if (right && x < 499)
+                if (right && x < dxmax - 1)
                     partnerx = x + 1;
                 else if (x > 0)
                     partnerx = x - 1;
@@ -306,12 +306,12 @@ int main(int argc, char* argv[]) {
         inputargc = parse_numwords(inputargv);
         x = y = 0;
 
-        printf("%s", inputargv[0]);
+        // printf("%s", inputargv[0]);
 
         if (strcmp(inputargv[0],"#") == 0 || *inputargv[0] == '#') {
-            printf(" comment:");
+            // printf(" comment:");
             for (i = 1; i < inputargc; i++) {
-                printf(" %s", inputargv[i]);
+                // printf(" %s", inputargv[i]);
             }
         } else if (strcmp(inputargv[0],"line") == 0) {
             addline(atof(inputargv[1]), atof(inputargv[2]), atof(inputargv[3]), atof(inputargv[4]), atof(inputargv[5]), atof(inputargv[6]));
@@ -378,7 +378,7 @@ int main(int argc, char* argv[]) {
         } else if (strcmp(inputargv[0],"file") == 0) {
             filename = inputargv[1];
         } else if (strcmp(inputargv[0],"end") == 0) {
-            printf(" read from input...\n");
+            // printf(" read from input...\n");
             goto draw;
         } else if (strcmp(inputargv[0],"sphere") == 0) {
             sphere(atof(inputargv[1]), atof(inputargv[2]), atof(inputargv[3]), atof(inputargv[4]));
@@ -386,12 +386,12 @@ int main(int argc, char* argv[]) {
             printf("Unknown command encountered: |%s|\n", inputargv[0]);
         }
 
-        printf("\n");
+        // printf("\n");
     }
 
     // drawinggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
 
-    draw: printf("drawing...\n");
+    draw:;//printf("drawing...\n");
 
     x = 0;
     y = 0;
@@ -415,7 +415,7 @@ int main(int argc, char* argv[]) {
                 x2 = (int) mat4_get(ematrix, 0, ii+1);
                 y2 = 0 - (int) mat4_get(ematrix, 1, ii+1);
                 //printf("drawing line %d, %d : %d, %d\n", x1, y1, x2, y2);
-                drawLine(x1, y1, x2, y2,130,130,130);
+                drawLine(x1, y1, x2, y2,255,255,255);
                 break;
             case 1: // cyclops
                 rx = (int) ((reyex * dxmax) / (sxmax - sxmin)  + dxmax / 2);
@@ -434,7 +434,7 @@ int main(int argc, char* argv[]) {
                 x2 = rx - x2 * rz / (rz - z2);
                 y2 = ry - y2 * rz / (rz - z2);
                 //printf("drawing line %d, %d : %d, %d\n", x1, y1, x2, y2);
-                drawLine(x1, y1, x2, y2, 130,130,130);
+                drawLine(x1, y1, x2, y2, 255,255,255);
 
                 break;
             case 2: // stereo
@@ -454,7 +454,7 @@ int main(int argc, char* argv[]) {
                 x2 = rx1 - x2 * rz1 / (rz1 - z2);
                 y2 = ry1 - y2 * rz1 / (rz1 - z2);
                 //printf("drawing line %d, %d : %d, %d\n", x1, y1, x2, y2);
-                drawLine(x1, y1, x2, y2, 130,0,0);
+                drawLine(x1, y1, x2, y2, 255,0,0);
 
 
                 rx2 = (int) ((leyex * dxmax) / (sxmax - sxmin)  + dxmax / 2);
@@ -473,7 +473,7 @@ int main(int argc, char* argv[]) {
                 x4 = rx2 - x4 * rz2 / (rz2 - z4);
                 y4 = ry2 - y4 * rz2 / (rz2 - z4);
                 //printf("drawing line %d, %d : %d, %d\n", x3, y3, x4, y4);
-                drawLine(x3, y3, x4, y4, 0,90,90);
+                drawLine(x3, y3, x4, y4, 0,130,130);
 
 
                 break;
@@ -487,7 +487,7 @@ int main(int argc, char* argv[]) {
         x = y = 0;
     }
 
-    printf("saving to ppm...\n");
+    printf("saving to ppm: '%s'\n", filename);
 
     FILE *fp = fopen(filename, "w"); //  initializes file
     fputs("P3\n", fp);
@@ -501,7 +501,10 @@ int main(int argc, char* argv[]) {
 
     while (y < dymax+1) { // puts pixel information into file.
         while (x < dxmax+1) {
-            sprintf(pixelstr, "%d %d %d ", pixels(y,x).r, pixels(y,x).g, pixels(y,x).b);
+            if (x == dxmax || y == dymax) // for some reason, this works. I have to analyze the pixels storage inisilaliztin.
+                sprintf(pixelstr,"0 0 0 ");
+            else
+                sprintf(pixelstr, "%d %d %d ", pixels(y,x).r, pixels(y,x).g, pixels(y,x).b);
             fputs(pixelstr, fp);
             fflush(fp);
             x++;

@@ -117,7 +117,7 @@ void sphere(double r, double cx, double cy, double cz) {
             // if not beginning, put points in ematrix
             if (phi != 0) {
                 addline(x1, y1, z1, x2, y2, z2);
-                printf("%f  %f  %f: %f   %f   %f   \n",x1,y1,z1,x2,y2,z2);
+                // printf("%f  %f  %f: %f   %f   %f   \n",x1,y1,z1,x2,y2,z2);
             }
 
             // set p 1
