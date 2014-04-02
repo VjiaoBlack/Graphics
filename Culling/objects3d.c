@@ -154,7 +154,7 @@ int main(int argc, char* argv[]) {
             move(mx,my,mz);
             transform();
 
-            // addcurrentobject();
+             addcurrentobject();
         } else if (strcmp(inputargv[0],"box-t") == 0) {
             box();
             sx = atof(inputargv[1]);
@@ -173,7 +173,7 @@ int main(int argc, char* argv[]) {
             move(mx,my,mz);
             transform();
 
-            // addcurrentobject();
+            addcurrentobject();
 
         } else {
             printf("Unknown command encountered: |%s|\n", inputargv[0]);

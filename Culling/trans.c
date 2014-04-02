@@ -48,7 +48,7 @@ void addcurrentobject() {
 
     }
 
-
+    
     omatrix = mat4_create(0);
     // printf("test\n");
     return;
@@ -73,9 +73,9 @@ void addtriangle(double x1, double y1, double z1, double x2, double y2, double z
     p3[2] = z3;
     p3[3] = 1;
 
-    mat4_add_column(ematrix, p1);
-    mat4_add_column(ematrix, p2);
-    mat4_add_column(ematrix, p3);
+    mat4_add_column(omatrix, p1);
+    mat4_add_column(omatrix, p2);
+    mat4_add_column(omatrix, p3);
 
     free(p1);
     free(p2);
