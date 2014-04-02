@@ -48,7 +48,7 @@ void addcurrentobject() {
 
     }
 
-    
+
     omatrix = mat4_create(0);
     // printf("test\n");
     return;
@@ -172,6 +172,11 @@ void transform() {
     return;
 }
 
+void rendertransform(){
+    ematrix = mat4_mult(tmatrix,ematrix);
+    return;
+}
+
 void box() { // unit box centered at origin 
     // triangles: top left and bottom right
     double l = +0.5, r = -0.5, t = +0.5, b = -0.5, f = -0.5, k = 0.5;
@@ -193,7 +198,7 @@ void box() { // unit box centered at origin
     addtriangle(l,t,f, r,t,k, r,t,f);
     // bottom
     addtriangle(l,b,f, r,b,f, l,b,k);
-    addtriangle(l,b,k, r,b,f, l,b,k);
+    addtriangle(l,b,k, r,b,f, r,b,k);
 
 }
 
@@ -206,12 +211,12 @@ void sphere() { // unit sphere centered at origin
 
     // plan: go through vertical slice by vertical slice, and draw the triangles that way.
 
-    for (theta = 0; theta < 360; theta += 15) { // t goes around the z axis
-        for (phi = 0; phi < 180; phi += 15) { // phi goes from +z to -z
+    for (theta = 0; theta < 360; theta += 12) { // t goes around the z axis
+        for (phi = 0; phi < 180; phi += 12) { // phi goes from +z to -z
             t1 = deg_to_rad(theta);
             p1 = deg_to_rad(phi);
-            t2 = deg_to_rad(theta + 15);
-            p2 = deg_to_rad(phi + 15);
+            t2 = deg_to_rad(theta + 12);
+            p2 = deg_to_rad(phi + 12);
 
             // triangle 1 (top right)
             x1 = sin(p1) * cos(t1);

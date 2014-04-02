@@ -25,6 +25,7 @@ void scale(double, double, double);
 void rotate(char, int);
 void combine(Mat4*);
 void transform();
+void rendertransform();
 void sphere();
 void box();
 double deg_to_rad(int);

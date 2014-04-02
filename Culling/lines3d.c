@@ -39,11 +39,6 @@ void drawLine(int x1, int y1, int x2, int y2, int ar, int ag, int ab) { // 0 for
     pixel_t partnerpixel;
     int r = ar, g = ag, b = ab;
 
-    printf("drawing a line\n");
-    printf("pixelxyr: %d\n", pixels(10,10).r);
-    printf("testing set values\n");
-    pixels(10,10).r = 1;
-
 
     if (x1 == x2 && y1 == y2) { // draw pixel if start and end point are same
         pixels(y1,x1) = (pixel_t) {r,g,b};
@@ -66,6 +61,8 @@ void drawLine(int x1, int y1, int x2, int y2, int ar, int ag, int ab) { // 0 for
         while (x <= x2) { // This is the drawing function 
             partnerx = x, partnery = y;
             // printf("testline\n");
+            // printf("%d, %d\n", x, y);
+
             if (acc) { // if there's acc, we need to change partnerp and pixel.
                 // the partner of the current pixel is at (x,y), (x,y+1) if DOWN, (x,y-1) if UP. (unless acc = 0)
                 if (up && y > 0)
@@ -136,18 +133,12 @@ void drawLine(int x1, int y1, int x2, int y2, int ar, int ag, int ab) { // 0 for
                 if (pixels(partnery,partnerx).b > 255)
                     pixels(partnery,partnerx).b = 255;
             } else {
-                printf("pre-r pixels max set\n");
-                printf("pixelxyr: %d\n", pixels(y,x).r);
 
                 if (pixels(y,x).r < r) {
-                    printf("test\n");
                     pixels(y,x).r = r;
                 }
-                printf("pre-g pixels max set\n");
                 pixels(y,x).g = (pixels(y,x).g > g) ? pixels(y,x).g : g;
-                printf("pre-b pixels max set\n");
                 pixels(y,x).b = (pixels(y,x).b > b) ? pixels(y,x).b : b;
-                printf("pre first maxcolor check\n");
                 if (pixels(y,x).r > 255)
                     pixels(y,x).r = 255;
                 if (pixels(y,x).g > 255)
@@ -161,8 +152,6 @@ void drawLine(int x1, int y1, int x2, int y2, int ar, int ag, int ab) { // 0 for
             // pixels(y,x).r = r;
             // pixels(y,x).g = g;
             // pixels(y,x).b = b;
-            printf("asdf\n");
-
             acc += abs(y2 - y1);
             if (acc >= delta) {
                 acc -= delta;
@@ -186,22 +175,22 @@ void drawLine(int x1, int y1, int x2, int y2, int ar, int ag, int ab) { // 0 for
         y = y1;
         right = (x2 > x1);
 
+
         while (y <= y2) { // drawing function
             partnerx = x, partnery = y;
-            printf("testline\n");
+            // printf("%d, %d\n", x, y);
+
             if (acc) {  // sets up correct partner pixel coords
                 if (right && x < dxmax - 1)
                     partnerx = x + 1;
                 else if (x > 0)
                     partnerx = x - 1;
-                printf("pre first maxcolor check\n");
                 if (pixels(y,x).r > 255)
                     pixels(y,x).r = 255;
                 if (pixels(y,x).g > 255)
                     pixels(y,x).g = 255;
                 if (pixels(y,x).b > 255)
                     pixels(y,x).b = 255;
-                printf("first maxcolor check\n");
                 // holdr = abs(r - pixels(y,x).r);
                 // holdg = abs(g - pixels(y,x).g);
                 // holdb = abs(b - pixels(y,x).b);
@@ -226,7 +215,6 @@ void drawLine(int x1, int y1, int x2, int y2, int ar, int ag, int ab) { // 0 for
                 if (pixels(partnery,partnerx).b > 255)
                     pixels(partnery,partnerx).b = 255;
 
-                printf("testline\n");
                 // holdr = abs(r - pixels(partnery,partnerx).r);
                 // holdg = abs(g - pixels(partnery,partnerx).g);
                 // holdb = abs(b - pixels(partnery,partnerx).b);
@@ -248,17 +236,11 @@ void drawLine(int x1, int y1, int x2, int y2, int ar, int ag, int ab) { // 0 for
                 if (pixels(partnery,partnerx).b > 255)
                     pixels(partnery,partnerx).b = 255;
             } else {
-                printf("pre-r pixels max set\n");
-                printf("pixelxyr: %d\n", pixels(y,x).r);
                 if (pixels(y,x).r < r) {
-                    printf("test\n");
                     pixels(y,x).r = r;
                 }
-                printf("pre-g pixels max set\n");
                 pixels(y,x).g = (pixels(y,x).g > g) ? pixels(y,x).g : g;
-                printf("pre-b pixels max set\n");
                 pixels(y,x).b = (pixels(y,x).b > b) ? pixels(y,x).b : b;
-                printf("pre first maxcolor check\n");
                 if (pixels(y,x).r > 255)
                     pixels(y,x).r = 255;
                 if (pixels(y,x).g > 255)
@@ -271,7 +253,6 @@ void drawLine(int x1, int y1, int x2, int y2, int ar, int ag, int ab) { // 0 for
             // pixels(y,x).r = r;
             // pixels(y,x).g = g;
             // pixels(y,x).b = b;
-            printf("asdf\n");
 
 
             acc += abs(x2 - x1);
@@ -286,7 +267,6 @@ void drawLine(int x1, int y1, int x2, int y2, int ar, int ag, int ab) { // 0 for
         }   
 
     }
-    printf("drawed a line!\n");
 }
 
     

@@ -49,10 +49,6 @@ int main(int argc, char* argv[]) {
 
     char commands[128];
 
-    // char** inputargv = calloc(7, sizeof(char*));
-    // for (i = 0; i < 7; i++) {
-    //     inputargv[i] = calloc(64, sizeof(char));
-    // }
     char** inputargv;
     int inputargc;
     mat4_delete(tmatrix);
@@ -63,26 +59,34 @@ int main(int argc, char* argv[]) {
         inputargc = parse_numwords(inputargv);
         x = y = 0;
 
-        // printf("%s", inputargv[0]);
-
-        if (strcmp(inputargv[0],"#") == 0 || *inputargv[0] == '#') {
-            // printf(" comment:");
-            for (i = 1; i < inputargc; i++) {
-                // printf(" %s", inputargv[i]);
-            }
-        } else if (strcmp(inputargv[0],"identity") == 0) {
+        if (strcmp(inputargv[0],"identity") == 0) {
             mat4_delete(tmatrix);
             tmatrix = identity();
         } else if (strcmp(inputargv[0],"move") == 0) {
+            push(tmatrix);
+            tmatrix = identity();
             move(atof(inputargv[1]), atof(inputargv[2]), atof(inputargv[3]));
+            tmatrix = mat4_mult(pop(),tmatrix);
         } else if (strcmp(inputargv[0],"scale") == 0) {
+            push(tmatrix);
+            tmatrix = identity();
             scale(atof(inputargv[1]), atof(inputargv[2]), atof(inputargv[3]));
+            tmatrix = mat4_mult(pop(),tmatrix);
         } else if (strcmp(inputargv[0],"rotate-x") == 0) {
+            push(tmatrix);
+            tmatrix = identity();
             rotate('x', atof(inputargv[1]));
+            tmatrix = mat4_mult(pop(),tmatrix);
         } else if (strcmp(inputargv[0],"rotate-y") == 0) {
+            push(tmatrix);
+            tmatrix = identity();
             rotate('y', atof(inputargv[1]));
+            tmatrix = mat4_mult(pop(),tmatrix);
         } else if (strcmp(inputargv[0],"rotate-z") == 0) {
+            push(tmatrix);
+            tmatrix = identity();
             rotate('z', atof(inputargv[1]));
+            tmatrix = mat4_mult(pop(),tmatrix);
         } else if (strcmp(inputargv[0],"screen") == 0) {
             sxmin = atof(inputargv[1]);
             symin = atof(inputargv[2]);
@@ -94,6 +98,8 @@ int main(int argc, char* argv[]) {
         } else if (strcmp(inputargv[0],"transform") == 0) {
             transform();
         } else if (strcmp(inputargv[0],"render-perspective-cyclops") == 0) {
+            printf("test\n");
+
             leyex = reyex = atof(inputargv[1]);
             leyey = reyey = atof(inputargv[2]);
             leyez = reyez = atof(inputargv[3]);
@@ -103,7 +109,7 @@ int main(int argc, char* argv[]) {
             tmatrix = identity();
             move(0 - sxmin, 0 - symax, 0);
             scale(((double) dxmax) / (sxmax - sxmin), ((double) dymax) / (symax - symin), ((double) dxmax) / (sxmax - sxmin));
-            transform();
+            rendertransform();
             tmatrix = render_holder;
         } else if (strcmp(inputargv[0],"render-perspective-stereo") == 0) { // note: you need to draw twice for this. Make drawing its own function.
             reyex = atof(inputargv[1]); // NOTE: not yet implemented
@@ -118,7 +124,7 @@ int main(int argc, char* argv[]) {
             tmatrix = identity();
             move(0 - sxmin, 0 - symax, 0);
             scale(((double) dxmax) / (sxmax - sxmin), ((double) dymax) / (symax - symin), ((double) dxmax) / (sxmax - sxmin));
-            transform();
+            rendertransform();
             tmatrix = render_holder;
         } else if (strcmp(inputargv[0],"render-parallel") == 0) {
             render = 0;
@@ -127,16 +133,16 @@ int main(int argc, char* argv[]) {
             tmatrix = identity();
             move(0 - sxmin, 0 - symax, 0);
             scale(((double) dxmax) / (sxmax - sxmin), ((double) dymax) / (symax - symin), 0);
-            transform();
+            rendertransform();
             tmatrix = render_holder;
         } else if (strcmp(inputargv[0],"file") == 0) {
             filename = inputargv[1];
         } else if (strcmp(inputargv[0],"end") == 0) {
-            // printf(" read from input...\n");
             goto draw;
         } else if (strcmp(inputargv[0],"sphere-t") == 0) { // TODO
             sphere(); // generates unit sphere
-
+            push(tmatrix);
+            tmatrix = identity();
             // the following applies the given transformations to the sphere only.
             sx = atof(inputargv[1]);
             sy = atof(inputargv[2]);
@@ -153,10 +159,13 @@ int main(int argc, char* argv[]) {
             rotate('z', roz);
             move(mx,my,mz);
             transform();
-
-             addcurrentobject();
+            tmatrix = pop();
+            transform();
+            addcurrentobject();
         } else if (strcmp(inputargv[0],"box-t") == 0) {
             box();
+            push(tmatrix);
+            tmatrix = identity();
             sx = atof(inputargv[1]);
             sy = atof(inputargv[2]);
             sz = atof(inputargv[3]);
@@ -172,19 +181,19 @@ int main(int argc, char* argv[]) {
             rotate('z', roz);
             move(mx,my,mz);
             transform();
-
+            tmatrix = pop();
+            transform();
             addcurrentobject();
 
         } else {
             printf("Unknown command encountered: |%s|\n", inputargv[0]);
         }
 
-        // printf("\n");
     }
 
     // drawinggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg
 
-    draw:;//printf("drawing...\n");
+    draw:;
 
     x = 0;
     y = 0;
@@ -214,7 +223,6 @@ int main(int argc, char* argv[]) {
                 x3 = rx - (int) mat4_get(ematrix, 0, ii+2);
                 y3 = ry + (int) mat4_get(ematrix, 1, ii+2);
                 z3 =            mat4_get(ematrix, 2, ii+2);
-                //printf("drawing line %d, %d : %d, %d\n", x1, y1, x2, y2);
                 p1[0] = mat4_get(ematrix, 0, ii);
                 p1[1] = mat4_get(ematrix, 1, ii);
                 p1[2] = mat4_get(ematrix, 2, ii);
@@ -232,7 +240,6 @@ int main(int argc, char* argv[]) {
                 }
                 break;
             case 1: // cyclops
-                printf("a cyclops!----------------------------\n");
                 rx = (int) ((reyex * dxmax) / (sxmax - sxmin)  + dxmax / 2);
                 ry = (int) ((reyey * dymax) / (symax - symin)  + dymax / 2);
                 rz = (int) ((reyez * dxmax) / (sxmax - sxmin));
@@ -256,7 +263,7 @@ int main(int argc, char* argv[]) {
                 p2[2] = mat4_get(ematrix, 2, ii+1);
                 p3[0] = mat4_get(ematrix, 0, ii+2);
                 p3[1] = mat4_get(ematrix, 1, ii+2);
-                p3[2] = mat4_get(ematrix, 2, ii+2);
+                p3[2] = mat4_get(ematrix, 2, ii+2); 
 
                 x1 = rx - x1 * rz / (rz - z1);
                 y1 = ry - y1 * rz / (rz - z1);
@@ -264,16 +271,12 @@ int main(int argc, char* argv[]) {
                 y2 = ry - y2 * rz / (rz - z2);
                 x3 = rx - x3 * rz / (rz - z3);
                 y3 = ry - y3 * rz / (rz - z3);
-                //printf("drawing line %d, %d : %d, %d\n", x1, y1, x2, y2);
 
-                // printf("testforvisible\n");
                 if (isvisible(p1,p2,p3,rx,0-ry,rz,0)){
-                    // printf("result: visible\n");
                     drawLine(x1, y1, x2, y2,255,255,255);
                     drawLine(x3, y3, x2, y2,255,255,255);
                     drawLine(x3, y3, x1, y1,255,255,255);
                 }
-                printf("end cyclops!////////////////////\n");
                 break;
             case 2: // stereo
                 rx1 = (int) ((reyex * dxmax) / (sxmax - sxmin)  + dxmax / 2);
@@ -305,7 +308,6 @@ int main(int argc, char* argv[]) {
                 y2 = ry1 - y2 * rz1 / (rz1 - z2);
                 x3 = rx1 - x2 * rz1 / (rz1 - z3);
                 y3 = ry1 - y2 * rz1 / (rz1 - z3);
-                //printf("drawing line %d, %d : %d, %d\n", x1, y1, x2, y2);
                 if (isvisible(p1,p2,p3,rx1,0-ry1,rz1,0)){
                     drawLine(x1, y1, x2, y2, 255,0,0);
                     drawLine(x3, y3, x2, y2, 255,0,0);
@@ -342,7 +344,6 @@ int main(int argc, char* argv[]) {
                 y5 = ry2 - y5 * rz2 / (rz2 - z5);
                 x6 = rx2 - x6 * rz2 / (rz2 - z6);
                 y6 = ry2 - y6 * rz2 / (rz2 - z6);
-                //printf("drawing line %d, %d : %d, %d\n", x3, y3, x4, y4);
                 if (isvisible(p1,p2,p3,rx2,0-rz2,ry2,0)){
                     drawLine(x4, y4, x5, y5, 0,180,180);
                     drawLine(x4, y4, x6, y6, 0,180,180);
@@ -355,8 +356,6 @@ int main(int argc, char* argv[]) {
 
         x = 0;
         y = 0;
-        //if (x1 > dxmax || x2 > dxmax || x2 < 0 || x1 < 0 || y1 > dymax || y2 > dymax || y1 < 0 || y2 < 0) 
-            //continue;
         x = y = 0;
     }
 
