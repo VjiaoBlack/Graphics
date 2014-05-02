@@ -618,18 +618,18 @@ int main(int argc, char* argv[]) {
     sprintf(sizes, "%d %d\n", dxmax+1, dymax+1);
     fputs(sizes, fp);
     fputs("255\n", fp);
-    char* pixelstr = calloc(sizeof(char), 2048);
+    // char* pixelstr = calloc(sizeof(char), 2048);
 
     x = y = 0;
 
     while (y < dymax+1) { // puts pixel information into file.
         while (x < dxmax+1) {
             if (x == dxmax || y == dymax) // for some reason, this works. I have to analyze the pixels storage inisilaliztin.
-                sprintf(pixelstr,"0 0 0 ");
+                fprintf(fp,"0 0 0 ");
             else
-                sprintf(pixelstr, "%d %d %d ", pixels(y,x).r, pixels(y,x).g, pixels(y,x).b);
-            fputs(pixelstr, fp);
-            fflush(fp);
+                fprintf(fp, "%d %d %d ", pixels(y,x).r, pixels(y,x).g, pixels(y,x).b);
+            // fputs(pixelstr, fp);
+            // fflush(fp);
             x++;
         }
         fputs("\n", fp);    
